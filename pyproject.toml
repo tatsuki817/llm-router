@@ -1,0 +1,77 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "llm-router"
+version = "0.1.0"
+description = "Intelligent LLM request router with priority queues, multi-model routing, circuit breakers, and semantic caching"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Terrence P" }]
+keywords = [
+    "llm",
+    "router",
+    "ollama",
+    "openai",
+    "priority-queue",
+    "circuit-breaker",
+    "caching",
+    "load-balancer",
+    "inference",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    "aiohttp>=3.9",
+]
+
+[project.optional-dependencies]
+openai = ["openai>=1.0"]
+cache = ["sentence-transformers>=2.2", "numpy>=1.24"]
+all = ["openai>=1.0", "sentence-transformers>=2.2", "numpy>=1.24"]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "ruff>=0.1",
+    "mypy>=1.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/TjTheDj2011/llm-router"
+Documentation = "https://github.com/TjTheDj2011/llm-router#readme"
+Repository = "https://github.com/TjTheDj2011/llm-router"
+Issues = "https://github.com/TjTheDj2011/llm-router/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/llm_router"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "TCH"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
